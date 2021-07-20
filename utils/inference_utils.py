@@ -531,6 +531,9 @@ def events_to_voxel_grid_pytorch(events, num_bins, width, height, device):
                                   index=xs[valid_indices] + ys[valid_indices]
                                   * width + tis_long[valid_indices] * width * height,
                                   source=vals_left[valid_indices])
+            # voxel_grid.scatter_add_(0, xs[valid_indices] + ys[valid_indices]
+            #                       * width + tis_long[valid_indices] * width * height,
+            #                         vals_left[valid_indices])
 
             valid_indices = (tis + 1) < num_bins
             valid_indices &= tis >= 0
@@ -539,6 +542,10 @@ def events_to_voxel_grid_pytorch(events, num_bins, width, height, device):
                                   index=xs[valid_indices] + ys[valid_indices] * width
                                   + (tis_long[valid_indices] + 1) * width * height,
                                   source=vals_right[valid_indices])
+            # voxel_grid.scatter_add_(0,
+            #                       xs[valid_indices] + ys[valid_indices] * width
+            #                       + (tis_long[valid_indices] + 1) * width * height,
+            #                       vals_right[valid_indices])
 
         voxel_grid = voxel_grid.view(num_bins, height, width)
 

@@ -30,6 +30,8 @@ if __name__ == "__main__":
     parser.add_argument('--skipevents', default=0, type=int)
     parser.add_argument('--suboffset', default=0, type=int)
     parser.add_argument('--compute_voxel_grid_on_cpu', dest='compute_voxel_grid_on_cpu', action='store_true')
+    parser.add_argument('--width', type=int)
+    parser.add_argument('--height', type=int)
     parser.set_defaults(compute_voxel_grid_on_cpu=False)
 
     set_inference_options(parser)
@@ -39,10 +41,13 @@ if __name__ == "__main__":
     # Read sensor size from the first first line of the event file
     path_to_events = args.input_file
 
-    header = pd.read_csv(path_to_events, delim_whitespace=True, header=None, names=['width', 'height'],
+    if args.width is not None and args.height is not None:
+        width, height = args.width, args.height
+    else:
+        header = pd.read_csv(path_to_events, delim_whitespace=True, header=None, names=['width', 'height'],
                          dtype={'width': np.int, 'height': np.int},
                          nrows=1)
-    width, height = header.values[0]
+        width, height = header.values[0]
     print('Sensor size: {} x {}'.format(width, height))
 
     # Load model

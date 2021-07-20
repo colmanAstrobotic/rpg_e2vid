@@ -4,6 +4,10 @@ from os.path import splitext
 import numpy as np
 from .timers import Timer
 
+import sys
+sys.path.append('/home/colmanglagovich/dev/prophesee-automotive-dataset-toolbox') # Add Prophesee toolbox to path
+from src.io.psee_loader import PSEELoader
+
 
 class FixedSizeEventReader:
     """
@@ -84,5 +88,29 @@ class FixedDurationEventReader:
                     self.last_stamp = t
                     event_window = np.array(event_list)
                     return event_window
+
+        raise StopIteration
+
+
+class PropheseeFixedDurationEventReader:
+    def __init__(self, path_to_event_file, duration_ms=50.0, start_index=0):
+        
+        self.video = PSEELoader(path_to_event_file)
+
+        self.last_stamp = self.video.total_time()
+        self.duration_us = duration_ms * 1000.0
+
+    def __iter__(self):
+        return self
+
+    def __del__(self):
+        del self.video
+
+    def __next__(self):
+        with Timer('Reading event window from file'):
+            while self.video.current_time < self.last_stamp:
+                win = self.video.load_delta_t(self.duration_us)
+                event_list = np.array([win['t'].astype(np.float), win['x'].astype(np.int), win['y'].astype(np.int), win['p'].astype(np.int)]).T
+                return event_list
 
         raise StopIteration
